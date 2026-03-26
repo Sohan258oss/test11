@@ -239,11 +239,11 @@ let rot=0,rotV=50.0,dragging=false,lastDX=0,dragV=0,hovered=-1;
 const cards=[];
 
 // ── INTRO SPIN STATE (Two-Stage Dimensional Entrance) ──
-const PHASE1_DUR = 2000;   // 2D Vortex (ms)
-const PHASE2_DUR = 2000;   // 3D Deployment (ms)
-const HIGH_SPEED = 50.0;   // High-speed spin
+const PHASE1_DUR = 1200;   // 2D Vortex (ms)
+const PHASE2_DUR = 2800;   // 3D Deployment (ms)
+const HIGH_SPEED = 18.0;   // High-speed spin
 const LOW_SPEED  = 0.1;    // Slow-motion glide
-const MAX_BLUR   = 20;     // Max motion blur (px)
+const MAX_BLUR   = 2;      // Max motion blur (px)
 
 let isIntroActive = true;
 let introP        = 0;     // 0 in Phase 1, 0→1 in Phase 2
@@ -292,42 +292,46 @@ function placeCards() {
   const gW = gstage.offsetWidth;
   const gH = gstage.offsetHeight;
 
-  // Full-size target radii
   const RX_FULL = Math.min(gW * 0.34, 300);
   const RY_FULL = gH * 0.18;
-
-  // Compact starting radii
   const RX_START = RX_FULL * 0.05;
-
-  // Current radii based on introP
-  const cur_rx = RX_START + (RX_FULL - RX_START) * introP;
-  const cur_ry_y = RX_START + (RY_FULL * 0.2 - RX_START) * introP;
-  const cur_ry_z = RY_FULL * introP;
-
-  // Visual offset to center the vortex around the hero text during Phase 1
-  // Hero text is roughly at 24% height, gallery center is at ~71%.
-  const yOffset = -H * 0.47 * (1 - introP);
 
   let frontIdx = 0, frontZ = -Infinity;
 
   cards.forEach((card, i) => {
+    // Individual staggered progress
+    const stagger = i * 0.12;
+    const cardP = Math.max(0, Math.min(1, (introP - stagger) / (1 - stagger * 0.8)));
+
+    // Smooth pop-in easing
+    const easeP = 1 - Math.pow(1 - cardP, 3);
+
+    const cur_rx = RX_START + (RX_FULL - RX_START) * easeP;
+    const cur_ry_y = RX_START + (RY_FULL * 0.2 - RX_START) * easeP;
+    const cur_ry_z = RY_FULL * easeP;
+    const yOffset = -H * 0.47 * (1 - easeP);
+
     const a     = (rot + (360 / N) * i) * Math.PI / 180;
     const x     = Math.cos(a) * cur_rx;
-    const y     = Math.sin(a) * cur_ry_y + yOffset;
+
+    // Floating idle animation
+    const float = Math.sin(Date.now() * 0.0015 + i * 0.8) * 12 * easeP;
+    const y     = Math.sin(a) * cur_ry_y + yOffset + float;
     const z     = Math.sin(a) * cur_ry_z;
 
-    // Use RY_FULL as base for depth calculations to ensure stability
     const depth = (z + RY_FULL) / (2 * RY_FULL);
-    const sc    = 0.65 + depth * 0.6;
-    const op    = 0.35 + depth * 0.65;
+    const sc    = (0.65 + depth * 0.6) * easeP; // scale up from 0
+    const op    = (0.35 + depth * 0.65) * easeP;
     const zi    = Math.round(depth * 100);
 
     if (z > frontZ) { frontZ = z; frontIdx = i; }
 
-    const blur = (MAX_BLUR * (1 - introP)).toFixed(2);
+    const blur = (MAX_BLUR * (1 - easeP)).toFixed(2);
+    const rY = (Math.cos(a) * 15 * easeP).toFixed(1); // Subtle 3D tilt
+
     const cardTransform = i === hovered
-      ? `translate3d(${x}px,${y - 40}px,${z}px) scale(${sc * 1.3})`
-      : `translate3d(${x}px,${y}px,${z}px) scale(${sc})`;
+      ? `translate3d(${x}px,${y - 40}px,${z}px) scale(${sc * 1.3}) rotateY(${rY}deg)`
+      : `translate3d(${x}px,${y}px,${z}px) scale(${sc}) rotateY(${rY}deg)`;
 
     card.style.transform = cardTransform;
     card.style.opacity = (op * (hovered >= 0 ? 0.5 : 1)).toFixed(2);
@@ -365,10 +369,14 @@ function openFS(i){const p=PROJECTS[i];fsImgEl.src=p.img;fsTitEl.textContent=p.n
 fsxEl.addEventListener('click',()=>{fsEl.classList.remove('on');fsOpen=false;});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&fsOpen){fsEl.classList.remove('on');fsOpen=false;}});
 
-// ── HERO DRIFT ──
+// ── GALLERY PARALLAX ──
 const htitle=document.getElementById('htitle');
 let hx=0,hy=0,thx=0,thy=0;
-document.addEventListener('mousemove',e=>{thx=(e.clientX-W/2)/W*12;thy=(e.clientY-H/2)/H*6;});
+let grX=0,grY=0,tgrX=0,tgrY=0;
+document.addEventListener('mousemove',e=>{
+  thx=(e.clientX-W/2)/W*12;thy=(e.clientY-H/2)/H*6;
+  tgrX=(e.clientY-H/2)/H*-6;tgrY=(e.clientX-W/2)/W*8;
+});
 
 // ── CURSOR HOVER ──
 document.querySelectorAll('a,.cta,.fsx').forEach(el=>{
@@ -388,6 +396,9 @@ function loop(){
   updateCursor();bgLoop();stepCarousel();
   hx+=(thx-hx)*.08;hy+=(thy-hy)*.08;
   htitle.style.transform=`translate(${hx}px,${hy}px)`;
+
+  grX+=(tgrX-grX)*.05;grY+=(tgrY-grY)*.05;
+  gcont.style.transform=`rotateX(${grX}deg) rotateY(${grY}deg)`;
 }
 
 window.addEventListener('resize',()=>{W=window.innerWidth;H=window.innerHeight;resize();});
