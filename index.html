@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>D4A Studio</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#0D0D0D;--grey:#C0C0C0;--dark:#2A2A2A;--off:#F5F4F0;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);cursor:none;font-family:'Courier New',Courier,monospace;}
+#bgc{position:fixed;inset:0;z-index:0;}
+#cur{position:fixed;pointer-events:none;z-index:9999;width:36px;height:36px;transform:translate(-50%,-50%);will-change:transform;}
+#cur svg{width:100%;height:100%;transition:transform .25s cubic-bezier(.16,1,.3,1);}
+#cur.big svg{transform:scale(1.9);}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:28px 52px;display:flex;justify-content:space-between;align-items:center;}
+.logo{font-size:12px;font-weight:700;letter-spacing:.45em;color:var(--off);text-decoration:none;display:flex;}
+.logo .l{display:inline-block;}
+.logo:hover .l{animation:ldrop .5s forwards;}
+.logo:hover .l:nth-child(1){animation-delay:.00s}.logo:hover .l:nth-child(2){animation-delay:.03s}.logo:hover .l:nth-child(3){animation-delay:.06s}.logo:hover .l:nth-child(4){animation-delay:.09s}.logo:hover .l:nth-child(5){animation-delay:.12s}.logo:hover .l:nth-child(6){animation-delay:.15s}.logo:hover .l:nth-child(7){animation-delay:.18s}.logo:hover .l:nth-child(8){animation-delay:.21s}
+@keyframes ldrop{0%{transform:translateY(0) skewX(0)}35%{transform:translateY(12px) skewX(-10deg);opacity:0}36%{transform:translateY(-12px) skewX(10deg);opacity:0}100%{transform:translateY(0) skewX(0);opacity:1}}
+.navlinks{display:flex;gap:44px;list-style:none;}
+.navlinks li a{font-size:10px;letter-spacing:.3em;color:var(--grey);text-decoration:none;display:flex;transition:color .4s;}
+.navlinks li a:hover{color:var(--off);}
+.navlinks li a span{display:inline-block;transition:transform .5s cubic-bezier(.19,1,.22,1);}
+.navlinks li a:hover span{transform:translateY(-5px);}
+.navlinks li a:hover span:nth-child(2n){transform:translateY(5px);}
+#hero{position:fixed;left:50%;top:24%;transform:translateX(-50%);z-index:100;text-align:center;pointer-events:none;user-select:none;}
+.htitle{font-size:clamp(18px,4vw,60px);font-weight:400;letter-spacing:.55em;color:var(--off);line-height:1;margin-bottom:20px;}
+.hsub{font-size:9px;letter-spacing:.45em;color:var(--grey);opacity:.5;margin-bottom:44px;}
+.cta{pointer-events:all;display:inline-block;font-size:10px;letter-spacing:.35em;color:var(--off);text-decoration:none;padding:13px 30px;position:relative;cursor:none;}
+.cta::before{content:'';position:absolute;height:1px;top:0;left:0;width:0;background:var(--off);transition:width .28s ease;}
+.cta::after{content:'';position:absolute;width:1px;top:0;right:0;height:0;background:var(--off);transition:height .28s ease .28s;}
+.cta .bb{position:absolute;height:1px;bottom:0;right:0;width:0;background:var(--off);transition:width .28s ease .56s;}
+.cta .bl{position:absolute;width:1px;bottom:0;left:0;height:0;background:var(--off);transition:height .28s ease .84s;}
+.cta:hover::before{width:100%;}.cta:hover::after{height:100%;}.cta:hover .bb{width:100%;}.cta:hover .bl{height:100%;}
+#gallery{position:fixed;bottom:0;left:0;right:0;height:58vh;z-index:60;}
+#gstage{position:absolute;inset:0;perspective:1100px;perspective-origin:50% 42%;transform-style:preserve-3d;transition:none;}
+#gcont{position:absolute;top:50%;left:50%;width:1px;height:1px;transform-style:preserve-3d;}
+.pcounter{position:absolute;top:14px;right:52px;font-size:10px;letter-spacing:.35em;color:var(--grey);opacity:.55;z-index:10;}
+.card{position:absolute;width:190px;height:260px;margin:-130px -95px;transform-style:preserve-3d;cursor:none;will-change:transform,opacity;}
+.card .ci{width:100%;height:100%;position:relative;overflow:hidden;}
+.card img{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.55) contrast(1.15) grayscale(.5);transition:filter .4s;}
+.card:hover img{filter:brightness(.82) contrast(1.1) grayscale(0);}
+.cinfo{position:absolute;bottom:0;left:0;right:0;padding:14px;background:linear-gradient(transparent,rgba(0,0,0,.9));transform:translateY(101%);transition:transform .32s cubic-bezier(.16,1,.3,1);}
+.card:hover .cinfo{transform:translateY(0);}
+.cname{font-size:9px;font-weight:700;letter-spacing:.3em;color:var(--off);margin-bottom:3px;}
+.cyear{font-size:8px;letter-spacing:.25em;color:var(--grey);margin-bottom:3px;}
+.cdesc{font-size:8px;color:rgba(255,255,255,.45);letter-spacing:.06em;}
+#fs{position:fixed;inset:0;z-index:500;background:var(--bg);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;clip-path:inset(50% 50% 50% 50%);transition:clip-path .65s cubic-bezier(.77,0,.175,1),opacity .05s;}
+#fs.on{opacity:1;pointer-events:all;clip-path:inset(0% 0% 0% 0%);}
+.fsx{position:absolute;top:28px;right:48px;font-size:22px;color:var(--off);cursor:none;opacity:.5;transition:opacity .2s;}
+.fsx:hover{opacity:1;}
+.fsc{display:flex;gap:60px;max-width:1100px;width:90%;align-items:center;}
+.fsimg{flex:1;aspect-ratio:4/3;overflow:hidden;}
+.fsimg img{width:100%;height:100%;object-fit:cover;display:block;}
+.fstxt{flex:0 0 280px;}
+.fstit{font-size:clamp(16px,2.5vw,30px);font-weight:700;letter-spacing:.3em;color:var(--off);margin-bottom:12px;}
+.fsyr{font-size:9px;letter-spacing:.35em;color:var(--grey);margin-bottom:22px;}
+.fsde{font-size:11px;line-height:2;color:rgba(255,255,255,.5);letter-spacing:.05em;}
+#foot{position:fixed;bottom:14px;left:52px;right:52px;z-index:100;display:flex;justify-content:space-between;pointer-events:none;}
+.ft{font-size:8px;letter-spacing:.3em;color:var(--dark);}
+#load{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity .8s ease .3s;}
+#load.hide{opacity:0;pointer-events:none;}
+.loadtxt{font-size:9px;letter-spacing:.5em;color:var(--dark);animation:pulse 1.5s ease infinite;}
+@keyframes pulse{0%,100%{opacity:.15}50%{opacity:.7}}
+@media(max-width:700px){nav{padding:20px 24px;}.navlinks{display:none;}#hero{top:20%;}.htitle{font-size:16px;letter-spacing:.3em;}#foot{left:24px;right:24px;}.pcounter{right:24px;}.fsc{flex-direction:column;gap:28px;}.fstxt{flex:0 0 auto;}.fsx{right:20px;}}
+</style>
+</head>
+<body>
+
+<div id="load"><div class="loadtxt">INITIALISING</div></div>
+<canvas id="bgc"></canvas>
+
+<div id="cur">
+  <svg viewBox="0 0 36 36" fill="none">
+    <circle cx="18" cy="18" r="7.5" stroke="#F5F4F0" stroke-width=".7" opacity=".5"/>
+    <line x1="18" y1="0" x2="18" y2="9" stroke="#F5F4F0" stroke-width=".7"/>
+    <line x1="18" y1="27" x2="18" y2="36" stroke="#F5F4F0" stroke-width=".7"/>
+    <line x1="0" y1="18" x2="9" y2="18" stroke="#F5F4F0" stroke-width=".7"/>
+    <line x1="27" y1="18" x2="36" y2="18" stroke="#F5F4F0" stroke-width=".7"/>
+    <circle cx="18" cy="18" r="1.3" fill="#F5F4F0" opacity=".9"/>
+  </svg>
+</div>
+
+<nav>
+  <a class="logo" href="#">
+    <span class="l">D</span><span class="l">4</span><span class="l">A</span><span class="l">S</span><span class="l">T</span><span class="l">U</span><span class="D">T</span><span class="I">I</span><span class="l">O</span>
+  </a>
+  <ul class="navlinks">
+    <li><a href="#"><span>P</span><span>R</span><span>O</span><span>J</span><span>E</span><span>C</span><span>T</span><span>S</span></a></li>
+    <li><a href="#"><span>A</span><span>P</span><span>P</span><span>R</span><span>O</span><span>A</span><span>C</span><span>H</span></a></li>
+    <li><a href="#"><span>A</span><span>B</span><span>O</span><span>U</span><span>T</span></a></li>
+    <li><a href="#"><span>C</span><span>O</span><span>N</span><span>T</span><span>A</span><span>C</span><span>T</span></a></li>
+  </ul>
+</nav>
+
+<div id="hero">
+  <div class="htitle" id="htitle">FORM FOLLOWS FORCE</div>
+  <div class="hsub">ARCHITECTURE STUDIO &nbsp;·&nbsp; EST. MMXII</div>
+  <a href="#" class="cta">VIEW WORK →<span class="bb"></span><span class="bl"></span></a>
+</div>
+
+<div id="gallery">
+  <div class="pcounter" id="pcounter">01 / 06</div>
+  <div id="gstage"><div id="gcont"></div></div>
+</div>
+
+<div id="fs">
+  <div class="fsx" id="fsx">✕</div>
+  <div class="fsc">
+    <div class="fsimg"><img id="fsimg" src="" alt=""></div>
+    <div class="fstxt">
+      <div class="fstit" id="fstit"></div>
+      <div class="fsyr" id="fsyr"></div>
+      <div class="fsde" id="fsde"></div>
+    </div>
+  </div>
+</div>
+
+<div id="foot">
+  <span class="ft">MONOLITH ARCHITECTURE STUDIO</span>
+  <span class="ft">© 2026 — ALL WORKS RESERVED</span>
+</div>
+
+<script>
+const PROJECTS=[
+  {name:'VERTEX TOWER',year:'2023',desc:'Post-tensioned concrete megastructure, 380m',img:'https://picsum.photos/800/600?grayscale&random=11',full:'A fundamental rethinking of the high-rise form — structural expression and spatial efficiency converge into a singular tectonic gesture. Exposed post-tension cables define both facade and interior character across 380 metres of built space.'},
+  {name:'NULL PAVILION',year:'2022',desc:'Folded steel surface pavilion, temporary installation',img:'https://picsum.photos/800/600?grayscale&random=22',full:'Material investigation into the threshold between surface and structure. A single continuous steel sheet, folded through computational geometry, generates all enclosure, support and programme without discrete elements.'},
+  {name:'AXIS BRIDGE',year:'2021',desc:'Carbon fibre pedestrian crossing, parametric form',img:'https://picsum.photos/800/600?grayscale&random=33',full:'Spanning 180 metres with a section depth of only 900mm. Carbon fibre composite allows structural performance impossible in conventional materials — form derived entirely from force-flow visualisation of the load paths.'},
+  {name:'SECTION HOUSE',year:'2022',desc:'Exposed concrete residential, brutalist sectional logic',img:'https://picsum.photos/800/600?grayscale&random=44',full:'The section drawing as architectural generator. Each floor level is displaced and exposed to the exterior, making the logic of section — normally invisible — the primary spatial and aesthetic experience.'},
+  {name:'MEMBRANE LAB',year:'2023',desc:'ETFE tensile research facility, adaptive envelope',img:'https://picsum.photos/800/600?grayscale&random=55',full:'A research facility whose envelope is the experiment. The ETFE cushion system monitors and responds to thermal, acoustic and light conditions — making environmental performance a direct spatial phenomenon.'},
+  {name:'GRID MONUMENT',year:'2020',desc:'Public monument, structural grid as cultural artifact',img:'https://picsum.photos/800/600?grayscale&random=66',full:'An abstract monument where the structural grid — the invisible armature of all buildings — becomes the subject. A 12-metre cube of pure structural logic, without programme, without enclosure.'},
+];
+
+let W=window.innerWidth,H=window.innerHeight;
+let mouseX=W/2,mouseY=H/2,realX=W/2,realY=H/2,curX=W/2,curY=H/2;
+const curEl=document.getElementById('cur');
+
+document.addEventListener('mousemove',e=>{realX=e.clientX;realY=e.clientY;mouseX=e.clientX;mouseY=e.clientY;});
+function updateCursor(){curX+=(realX-curX)*.12;curY+=(realY-curY)*.12;curEl.style.left=curX+'px';curEl.style.top=curY+'px';}
+
+// ── CANVAS ──
+const canvas=document.getElementById('bgc');
+const ctx=canvas.getContext('2d');
+let COLS,ROWS,nodes=[],particles=[];
+let scatterX=-9999,scatterY=-9999;
+
+function resize(){
+  W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;
+  COLS=Math.ceil(W/55)+2;ROWS=Math.ceil(H/55)+2;
+  buildGrid();buildParticles();
+}
+
+function buildGrid(){
+  nodes=[];
+  const sx=W/(COLS-1),sy=H/(ROWS-1);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const ox=c*sx,oy=r*sy;nodes.push({ox,oy,x:ox,y:oy,vx:0,vy:0});
+  }
+}
+
+function buildParticles(){
+  particles=[];
+  const N=Math.min(1800,Math.floor(W*H/900));
+  for(let i=0;i<N;i++)particles.push({
+    x:Math.random()*W,y:Math.random()*H,
+    vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,
+    sz:Math.random()*.9+.3,al:Math.random()*.28+.05,
+    dash:Math.random()<.3,ang:Math.random()*Math.PI,len:Math.random()*8+3,
+    trail:[],tlen:Math.floor(Math.random()*5+2)
+  });
+}
+
+function stepGrid(){
+  for(const n of nodes){
+    n.vx+=(n.ox-n.x)*.14;n.vy+=(n.oy-n.y)*.14;
+    let dx=n.x-mouseX,dy=n.y-mouseY,d2=dx*dx+dy*dy;
+    if(d2<200*200){const d=Math.sqrt(d2)||1,f=.22*(1-d/200)*(1-d/200);n.vx+=dx/d*f*130;n.vy+=dy/d*f*130;}
+    let cx=n.x-scatterX,cy=n.y-scatterY,cd2=cx*cx+cy*cy;
+    if(cd2<130*130){const cd=Math.sqrt(cd2)||1,cf=.1*(1-cd/130)*(1-cd/130);n.vx+=cx/cd*cf*70;n.vy+=cy/cd*cf*70;}
+    n.vx*=.78;n.vy*=.78;n.x+=n.vx;n.y+=n.vy;
+  }
+}
+
+function drawGrid(){
+  ctx.lineWidth=.5;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS-1;c++){
+    const n1=nodes[r*COLS+c],n2=nodes[r*COLS+c+1];
+    const mx=(n1.x+n2.x)*.5-mouseX,my=(n1.y+n2.y)*.5-mouseY,d=Math.sqrt(mx*mx+my*my);
+    ctx.strokeStyle=`rgba(255,255,255,${(d<260?(.06+.3*(1-d/260)):.06).toFixed(2)})`;
+    ctx.beginPath();ctx.moveTo(n1.x,n1.y);ctx.lineTo(n2.x,n2.y);ctx.stroke();
+  }
+  for(let c=0;c<COLS;c++)for(let r=0;r<ROWS-1;r++){
+    const n1=nodes[r*COLS+c],n2=nodes[(r+1)*COLS+c];
+    const mx=(n1.x+n2.x)*.5-mouseX,my=(n1.y+n2.y)*.5-mouseY,d=Math.sqrt(mx*mx+my*my);
+    ctx.strokeStyle=`rgba(255,255,255,${(d<260?(.06+.3*(1-d/260)):.06).toFixed(2)})`;
+    ctx.beginPath();ctx.moveTo(n1.x,n1.y);ctx.lineTo(n2.x,n2.y);ctx.stroke();
+  }
+  for(const n of nodes){
+    const dx=n.x-mouseX,dy=n.y-mouseY,d=Math.sqrt(dx*dx+dy*dy);
+    if(d<160){ctx.beginPath();ctx.arc(n.x,n.y,1.3,0,6.28);ctx.fillStyle=`rgba(245,244,240,${(.85*(1-d/160)).toFixed(2)})`;ctx.fill();}
+  }
+}
+
+function stepParticles(){
+  for(const p of particles){
+    const dx=p.x-mouseX,dy=p.y-mouseY,d=Math.sqrt(dx*dx+dy*dy);
+    if(d<150){const f=.011*(1-d/150)*(1-d/150);p.vx+=dx/d*f*110;p.vy+=dy/d*f*110;}
+    p.vx+=(W*.5-p.x)*.000012;p.vy+=(H*.5-p.y)*.000012;
+    p.vx*=.97;p.vy*=.97;
+    p.trail.push({x:p.x,y:p.y});if(p.trail.length>p.tlen)p.trail.shift();
+    p.x+=p.vx;p.y+=p.vy;p.ang+=.007;
+    if(p.x<-30)p.x=W+30;if(p.x>W+30)p.x=-30;
+    if(p.y<-30)p.y=H+30;if(p.y>H+30)p.y=-30;
+  }
+}
+
+function drawParticles(){
+  for(const p of particles){
+    if(!p.dash){
+      ctx.beginPath();ctx.arc(p.x,p.y,p.sz,0,6.28);ctx.fillStyle=`rgba(192,192,192,${p.al})`;ctx.fill();
+      if(p.trail.length>1){
+        ctx.beginPath();ctx.moveTo(p.trail[0].x,p.trail[0].y);for(const t of p.trail)ctx.lineTo(t.x,t.y);
+        ctx.strokeStyle=`rgba(192,192,192,${(p.al*.2).toFixed(2)})`;ctx.lineWidth=.3;ctx.stroke();
+      }
+    }else{
+      const c=Math.cos(p.ang),s=Math.sin(p.ang);
+      ctx.beginPath();ctx.moveTo(p.x-c*p.len,p.y-s*p.len);ctx.lineTo(p.x+c*p.len,p.y+s*p.len);
+      ctx.strokeStyle=`rgba(192,192,192,${(p.al*.6).toFixed(2)})`;ctx.lineWidth=.4;ctx.stroke();
+    }
+  }
+}
+
+function bgLoop(){ctx.clearRect(0,0,W,H);stepGrid();drawGrid();stepParticles();drawParticles();}
+
+// ── GALLERY ──
+const gcont=document.getElementById('gcont'),gstage=document.getElementById('gstage'),pcEl=document.getElementById('pcounter');
+let rot=0,rotV=15.0,dragging=false,lastDX=0,dragV=0,hovered=-1;
+const cards=[];
+
+// ── INTRO SPIN STATE ──
+// tickIntro writes introP (0→1) each frame.
+// placeCards reads introP to lerp rx/ry from compact → full.
+const INTRO_DUR    = 2500;   // ms for the full flourish
+const INTRO_FAST   = 15.0;   // starting rotV — blur-spin on load
+const INTRO_NORMAL = 0.15;   // cruising rotV after intro
+const introStart   = Date.now();
+
+let isIntroActive = true;
+let introP        = 0;       // eased progress 0→1, shared with placeCards
+
+function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
+
+function tickIntro() {
+  if (!isIntroActive) return;           // settled — bail early
+
+  const elapsed = Date.now() - introStart;
+  const raw     = Math.min(elapsed / INTRO_DUR, 1); // linear 0→1
+  introP        = easeOutCubic(raw);                // eased  0→1
+
+  // Decelerate: lerp rotV from INTRO_FAST → INTRO_NORMAL using eased p
+  rotV = INTRO_FAST * (1 - introP) + INTRO_NORMAL * introP;
+
+  if (raw >= 1) {
+    isIntroActive = false;
+    rotV          = INTRO_NORMAL;   // lock to exact cruise speed
+    introP        = 1;              // lock radius to full size
+  }
+}
+
+PROJECTS.forEach((p,i)=>{
+  const card=document.createElement('div');card.className='card';
+  card.innerHTML=`<div class="ci"><img src="${p.img}" alt="${p.name}" loading="lazy"><div class="cinfo"><div class="cname">${p.name}</div><div class="cyear">${p.year}</div><div class="cdesc">${p.desc}</div></div></div>`;
+  gcont.appendChild(card);cards.push(card);
+  card.addEventListener('mouseenter',()=>{curEl.classList.add('big');hovered=i;const r=card.getBoundingClientRect();scatterX=r.left+r.width/2;scatterY=r.top+r.height/2;});
+  card.addEventListener('mouseleave',()=>{curEl.classList.remove('big');hovered=-1;scatterX=-9999;scatterY=-9999;});
+  card.addEventListener('click',()=>openFS(i));
+});
+
+function placeCards() {
+  const N  = cards.length;
+  const gW = gstage.offsetWidth;
+  const gH = gstage.offsetHeight;
+
+  // Full-size target radii
+  const RX_FULL = Math.min(gW * 0.34, 300);
+  const RY_FULL = gH * 0.18;
+
+  // Compact starting radii — cards clustered tightly at centre on load
+  const RX_START = RX_FULL * 0.08;
+  const RY_START = RY_FULL * 0.08;
+
+  // Lerp compact → full using eased introP written by tickIntro each frame
+  const rx = RX_START + (RX_FULL - RX_START) * introP;
+  const ry = RY_START + (RY_FULL - RY_START) * introP;
+
+  let frontIdx = 0, frontZ = -Infinity;
+
+  cards.forEach((card, i) => {
+    const a     = (rot + (360 / N) * i) * Math.PI / 180;
+    const x     = Math.cos(a) * rx;
+    const z     = Math.sin(a) * ry;
+    const y     = Math.sin(a) * ry * 0.2;
+    const depth = (z + ry) / (2 * ry);
+    const sc    = 0.65 + depth * 0.6;
+    const op    = 0.35 + depth * 0.65;
+    const zi    = Math.round(depth * 100);
+
+    if (z > frontZ) { frontZ = z; frontIdx = i; }
+
+    card.style.cssText = i === hovered
+      ? `transform:translate3d(${x}px,${y - 40}px,${z}px) scale(${sc * 1.3});opacity:1;z-index:220;`
+      : `transform:translate3d(${x}px,${y}px,${z}px) scale(${sc});opacity:${(op * (hovered >= 0 ? 0.5 : 1)).toFixed(2)};z-index:${zi};`;
+  });
+
+  pcEl.textContent =
+    String(frontIdx + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0');
+}
+
+function stepCarousel(){
+  tickIntro();                  // 1. update introP and rotV
+  if(!dragging){rot+=rotV;}     // 2. advance rotation
+  placeCards();                 // 3. position cards using latest introP
+}
+
+gstage.addEventListener('mousedown',e=>{dragging=true;lastDX=e.clientX;dragV=0;e.stopPropagation();});
+document.addEventListener('mousemove',e=>{if(!dragging)return;const dx=e.clientX-lastDX;dragV=dx*.35;rot+=dx*.3;lastDX=e.clientX;});
+document.addEventListener('mouseup',()=>{if(dragging){dragging=false;rotV=dragV*.5;}});
+let tLX=0;
+gstage.addEventListener('touchstart',e=>{dragging=true;tLX=e.touches[0].clientX;dragV=0;},{passive:true});
+gstage.addEventListener('touchmove',e=>{if(!dragging)return;const dx=e.touches[0].clientX-tLX;dragV=dx*.35;rot+=dx*.3;tLX=e.touches[0].clientX;mouseX=e.touches[0].clientX;mouseY=e.touches[0].clientY;},{passive:true});
+gstage.addEventListener('touchend',()=>{dragging=false;rotV=dragV*.5;});
+
+// ── FULLSCREEN ──
+const fsEl=document.getElementById('fs'),fsImgEl=document.getElementById('fsimg'),fsTitEl=document.getElementById('fstit'),fsYrEl=document.getElementById('fsyr'),fsDeEl=document.getElementById('fsde'),fsxEl=document.getElementById('fsx');
+let fsOpen=false;
+function openFS(i){const p=PROJECTS[i];fsImgEl.src=p.img;fsTitEl.textContent=p.name;fsYrEl.textContent=p.year+' — '+p.desc;fsDeEl.textContent=p.full;fsEl.classList.add('on');fsOpen=true;}
+fsxEl.addEventListener('click',()=>{fsEl.classList.remove('on');fsOpen=false;});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&fsOpen){fsEl.classList.remove('on');fsOpen=false;}});
+
+// ── HERO DRIFT ──
+const htitle=document.getElementById('htitle');
+let hx=0,hy=0,thx=0,thy=0;
+document.addEventListener('mousemove',e=>{thx=(e.clientX-W/2)/W*12;thy=(e.clientY-H/2)/H*6;});
+
+// ── CURSOR HOVER ──
+document.querySelectorAll('a,.cta,.fsx').forEach(el=>{
+  el.addEventListener('mouseenter',()=>curEl.classList.add('big'));
+  el.addEventListener('mouseleave',()=>curEl.classList.remove('big'));
+});
+
+// ── MOBILE ──
+if('ontouchstart'in window){
+  curEl.style.display='none';
+  setInterval(()=>{const t=Date.now()*.001;mouseX=W*.5+Math.sin(t*.4)*W*.28;mouseY=H*.5+Math.cos(t*.3)*H*.22;thx=Math.sin(t*.25)*8;thy=Math.cos(t*.2)*4;},16);
+}
+
+// ── LOOP ──
+function loop(){
+  requestAnimationFrame(loop);
+  updateCursor();bgLoop();stepCarousel();
+  hx+=(thx-hx)*.08;hy+=(thy-hy)*.08;
+  htitle.style.transform=`translate(${hx}px,${hy}px)`;
+}
+
+window.addEventListener('resize',()=>{W=window.innerWidth;H=window.innerHeight;resize();});
+resize();loop();
+setTimeout(()=>document.getElementById('load').classList.add('hide'),700);
+</script>
+</body>
+</html>
