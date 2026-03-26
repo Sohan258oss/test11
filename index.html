@@ -235,36 +235,44 @@ function bgLoop(){ctx.clearRect(0,0,W,H);stepGrid();drawGrid();stepParticles();d
 
 // ── GALLERY ──
 const gcont=document.getElementById('gcont'),gstage=document.getElementById('gstage'),pcEl=document.getElementById('pcounter');
-let rot=0,rotV=15.0,dragging=false,lastDX=0,dragV=0,hovered=-1;
+let rot=0,rotV=50.0,dragging=false,lastDX=0,dragV=0,hovered=-1;
 const cards=[];
 
 // ── INTRO SPIN STATE ──
 // tickIntro writes introP (0→1) each frame.
 // placeCards reads introP to lerp rx/ry from compact → full.
-const INTRO_DUR    = 2500;   // ms for the full flourish
-const INTRO_FAST   = 15.0;   // starting rotV — blur-spin on load
+const INTRO_DUR    = 3000;   // ms for the full flourish
+const INTRO_FAST   = 50.0;   // starting rotV — blur-spin on load
 const INTRO_NORMAL = 0.15;   // cruising rotV after intro
-const introStart   = Date.now();
 
 let isIntroActive = true;
 let introP        = 0;       // eased progress 0→1, shared with placeCards
+let lastPhysicsTick = Date.now();
+let elapsedPhysicsTime = 0;
 
 function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
 
-function tickIntro() {
-  if (!isIntroActive) return;           // settled — bail early
+function tickPhysics() {
+  if (!isIntroActive) return;
 
-  const elapsed = Date.now() - introStart;
-  const raw     = Math.min(elapsed / INTRO_DUR, 1); // linear 0→1
-  introP        = easeOutCubic(raw);                // eased  0→1
+  const now = Date.now();
+  let dt = now - lastPhysicsTick;
+  lastPhysicsTick = now;
 
-  // Decelerate: lerp rotV from INTRO_FAST → INTRO_NORMAL using eased p
+  // Reactiveness: hover provides resistance
+  if (hovered !== -1) dt *= 0.3;
+
+  elapsedPhysicsTime += dt;
+  const raw = Math.min(elapsedPhysicsTime / INTRO_DUR, 1);
+  introP = easeOutCubic(raw);
+
+  // The Cooldown: transition from burst to calm cruise speed
   rotV = INTRO_FAST * (1 - introP) + INTRO_NORMAL * introP;
 
   if (raw >= 1) {
     isIntroActive = false;
-    rotV          = INTRO_NORMAL;   // lock to exact cruise speed
-    introP        = 1;              // lock radius to full size
+    rotV = INTRO_NORMAL;
+    introP = 1;
   }
 }
 
@@ -287,8 +295,8 @@ function placeCards() {
   const RY_FULL = gH * 0.18;
 
   // Compact starting radii — cards clustered tightly at centre on load
-  const RX_START = RX_FULL * 0.08;
-  const RY_START = RY_FULL * 0.08;
+  const RX_START = RX_FULL * 0.05;
+  const RY_START = RY_FULL * 0.05;
 
   // Lerp compact → full using eased introP written by tickIntro each frame
   const rx = RX_START + (RX_FULL - RX_START) * introP;
@@ -318,7 +326,7 @@ function placeCards() {
 }
 
 function stepCarousel(){
-  tickIntro();                  // 1. update introP and rotV
+  tickPhysics();                // 1. update introP and rotV
   if(!dragging){rot+=rotV;}     // 2. advance rotation
   placeCards();                 // 3. position cards using latest introP
 }
