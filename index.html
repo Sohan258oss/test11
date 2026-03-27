@@ -16,7 +16,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:28px 52px;display:fl
 .logo{font-size:12px;font-weight:700;letter-spacing:.45em;color:var(--off);text-decoration:none;display:flex;}
 .logo .l{display:inline-block;}
 .logo:hover .l{animation:ldrop .5s forwards;}
-.logo:hover .l:nth-child(1){animation-delay:.00s}.logo:hover .l:nth-child(2){animation-delay:.03s}.logo:hover .l:nth-child(3){animation-delay:.06s}.logo:hover .l:nth-child(4){animation-delay:.09s}.logo:hover .l:nth-child(5){animation-delay:.12s}.logo:hover .l:nth-child(6){animation-delay:.15s}.logo:hover .l:nth-child(7){animation-delay:.18s}.logo:hover .l:nth-child(8){animation-delay:.21s}
+.logo:hover .l:nth-child(1){animation-delay:.00s}.logo:hover .l:nth-child(2){animation-delay:.03s}.logo:hover .l:nth-child(3){animation-delay:.06s}.logo:hover .l:nth-child(4){animation-delay:.09s}.logo:hover .l:nth-child(5){animation-delay:.12s}.logo:hover .l:nth-child(6){animation-delay:.15s}.logo:hover .l:nth-child(7){animation-delay:.18s}.logo:hover .l:nth-child(8){animation-delay:.21s}.logo:hover .l:nth-child(9){animation-delay:.24s}
 @keyframes ldrop{0%{transform:translateY(0) skewX(0)}35%{transform:translateY(12px) skewX(-10deg);opacity:0}36%{transform:translateY(-12px) skewX(10deg);opacity:0}100%{transform:translateY(0) skewX(0);opacity:1}}
 .navlinks{display:flex;gap:44px;list-style:none;}
 .navlinks li a{font-size:10px;letter-spacing:.3em;color:var(--grey);text-decoration:none;display:flex;transition:color .4s;}
@@ -25,7 +25,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:28px 52px;display:fl
 .navlinks li a:hover span{transform:translateY(-5px);}
 .navlinks li a:hover span:nth-child(2n){transform:translateY(5px);}
 #hero{position:fixed;left:50%;top:24%;transform:translate(-50%,30px);z-index:100;text-align:center;pointer-events:none;user-select:none;opacity:0;transition:transform 1.5s cubic-bezier(.16,1,.3,1),opacity 1.5s ease;}
-.htitle{font-size:clamp(18px,4vw,60px);font-weight:400;letter-spacing:.55em;color:var(--off);line-height:1;margin-bottom:20px;}
+.htitle{font-size:clamp(18px,4vw,60px);font-weight:400;letter-spacing:.55em;color:var(--off);line-height:1;margin-bottom:20px;white-space:nowrap;}
 .hsub{font-size:9px;letter-spacing:.45em;color:var(--grey);opacity:.5;margin-bottom:44px;}
 .cta{pointer-events:all;display:inline-block;font-size:10px;letter-spacing:.35em;color:var(--off);text-decoration:none;padding:13px 30px;position:relative;cursor:none;}
 .cta::before{content:'';position:absolute;height:1px;top:0;left:0;width:0;background:var(--off);transition:width .28s ease;}
@@ -57,13 +57,19 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:28px 52px;display:fl
 .fstit{font-size:clamp(16px,2.5vw,30px);font-weight:700;letter-spacing:.3em;color:var(--off);margin-bottom:12px;}
 .fsyr{font-size:9px;letter-spacing:.35em;color:var(--grey);margin-bottom:22px;}
 .fsde{font-size:11px;line-height:2;color:rgba(255,255,255,.5);letter-spacing:.05em;}
-#foot{position:fixed;bottom:14px;left:52px;right:52px;z-index:100;display:flex;justify-content:space-between;pointer-events:none;opacity:0;transform:translateY(30px);transition:transform 1.5s cubic-bezier(.16,1,.3,1),opacity 1.5s ease;}
-.ft{font-size:8px;letter-spacing:.3em;color:var(--dark);}
+#foot{position:fixed;bottom:30px;left:0;right:0;z-index:1000;display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none;opacity:0;transform:translateY(30px);transition:transform 1.5s cubic-bezier(.16,1,.3,1),opacity 1.5s ease;font-family:'sf corbel',Corbel,sans-serif;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,0.8);}
+#foot a{pointer-events:all;color:inherit;text-decoration:none;display:flex;align-items:center;gap:8px;transition:opacity .3s;}
+#foot a:hover{opacity:.7;}
+.ft-row{display:flex;align-items:center;gap:8px;font-size:14px;letter-spacing:.05em;}
+.ft-row b{font-weight:700;}
+.ft-icons{display:flex;gap:20px;margin-top:8px;}
+.ft-icons svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;}
+.ft-icons .fill{fill:currentColor;stroke:none;}
 #load{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity .8s ease .3s;}
 #load.hide{opacity:0;pointer-events:none;}
 .loadtxt{font-size:9px;letter-spacing:.5em;color:var(--dark);animation:pulse 1.5s ease infinite;}
 @keyframes pulse{0%,100%{opacity:.15}50%{opacity:.7}}
-@media(max-width:700px){nav{padding:20px 24px;}.navlinks{display:none;}#hero{top:20%;}.htitle{font-size:16px;letter-spacing:.3em;}#foot{left:24px;right:24px;}.pcounter{right:24px;}.fsc{flex-direction:column;gap:28px;}.fstxt{flex:0 0 auto;}.fsx{right:20px;}}
+@media(max-width:700px){nav{padding:20px 24px;}.navlinks{display:none;}#hero{top:20%;}.htitle{font-size:16px;letter-spacing:.3em;}#foot{bottom:20px;}.pcounter{right:24px;}.fsc{flex-direction:column;gap:28px;}.fstxt{flex:0 0 auto;}.fsx{right:20px;}}
 .reveal nav,.reveal #foot,.reveal .pcounter{opacity:1;transform:translateY(0);}.reveal #hero{opacity:1;transform:translate(-50%,0);}
 </style>
 </head>
@@ -85,7 +91,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:28px 52px;display:fl
 
 <nav>
   <a class="logo" href="#">
-    <span class="l">D</span><span class="l">4</span><span class="l">A</span><span class="l">S</span><span class="l">T</span><span class="l">U</span><span class="D">T</span><span class="I">I</span><span class="l">O</span>
+    <span class="l">D</span><span class="l">4</span><span class="l">A</span><span class="l">S</span><span class="l">T</span><span class="l">U</span><span class="l">D</span><span class="l">I</span><span class="l">O</span>
   </a>
   <ul class="navlinks">
     <li><a href="#"><span>P</span><span>R</span><span>O</span><span>J</span><span>E</span><span>C</span><span>T</span><span>S</span></a></li>
@@ -119,8 +125,23 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:28px 52px;display:fl
 </div>
 
 <div id="foot">
-  <span class="ft">MONOLITH ARCHITECTURE STUDIO</span>
-  <span class="ft">© 2026 — ALL WORKS RESERVED</span>
+  <div class="ft-row">Contact Us: &nbsp;<b>d4astudios@gmail.com</b></div>
+  <a href="tel:+919876543210" class="ft-row">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+    <span>+91 98765 43210</span>
+  </a>
+  <div class="ft-row">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
+    <span>Bengaluru, Karnataka</span>
+  </div>
+  <div class="ft-icons">
+    <a href="https://instagram.com" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+    </a>
+    <a href="https://linkedin.com" target="_blank">
+      <svg class="fill" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+    </a>
+  </div>
 </div>
 
 <script>
@@ -310,7 +331,7 @@ function placeCards() {
     const cur_rx = RX_START + (RX_FULL - RX_START) * easeP;
     const cur_ry_y = RX_START + (RY_FULL * 0.2 - RX_START) * easeP;
     const cur_ry_z = RY_FULL * easeP;
-    const yOffset = -H * 0.47 * (1 - easeP);
+    const yOffset = -150 * easeP - H * 0.47 * (1 - easeP);
 
     const a     = (rot + (360 / N) * i) * Math.PI / 180;
     const x     = Math.cos(a) * cur_rx;
