@@ -9,6 +9,27 @@
 :root{--bg:#0D0D0D;--grey:#C0C0C0;--dark:#2A2A2A;--off:#F5F4F0;}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Courier New',Courier,monospace;}
 #bgc{position:fixed;inset:0;z-index:0;}
+
+/* ── SPLASH ── */
+#splash{
+  position:fixed;top:0;left:0;width:100%;height:100vh;
+  background:#000;
+  display:flex;align-items:center;justify-content:center;
+  z-index:99999;
+  opacity:1;
+  transition:opacity .8s ease;
+}
+#splash video{
+  width:100%;
+  max-width:480px;
+  height:auto;
+  display:block;
+}
+#splash.fade-out{
+  opacity:0;
+  pointer-events:none;
+}
+
 nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:28px 52px;display:flex;justify-content:space-between;align-items:center;opacity:0;transform:translateY(30px);transition:transform 1.5s cubic-bezier(.16,1,.3,1),opacity 1.5s ease;}
 .logo{font-size:12px;font-weight:700;letter-spacing:.45em;color:var(--off);text-decoration:none;display:flex;}
 .logo .l{display:inline-block;}
@@ -22,7 +43,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:28px 52px;display:fl
 .navlinks li a:hover span{transform:translateY(-5px);}
 .navlinks li a:hover span:nth-child(2n){transform:translateY(5px);}
 #hero{position:fixed;left:50%;top:24%;transform:translate(-50%,30px);z-index:100;text-align:center;pointer-events:none;user-select:none;opacity:0;transition:transform 1.5s cubic-bezier(.16,1,.3,1),opacity 1.5s ease;}
-.htitle{font-size:clamp(18px,4vw,60px);font-weight:400;letter-spacing:.55em;color:var(--off);line-height:1;margin-bottom:20px;white-space:nowrap;}
+.htitle{font-size:clamp(18px,4vw,20px);font-weight:400;letter-spacing:.55em;color:var(--off);line-height:1;margin-bottom:20px;white-space:nowrap;}
 .cta{pointer-events:all;display:inline-block;font-size:10px;letter-spacing:.35em;color:var(--off);text-decoration:none;padding:13px 30px;position:relative;cursor:pointer;transition:letter-spacing .3s, background .3s;}
 .cta:hover{letter-spacing:.45em;background:rgba(245,244,240,0.03);}
 .cta-l{position:absolute;background:var(--off);transition:all .4s cubic-bezier(.16,1,.3,1);opacity:0;}
@@ -84,6 +105,21 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:28px 52px;display:fl
 </head>
 <body>
 
+<!-- ── SPLASH ── -->
+<div id="splash">
+  <video
+    id="splashVideo"
+    muted
+    autoplay
+    playsinline
+    webkit-playsinline
+    preload="metadata"
+  >
+    <source src="splash.webm" type="video/webm" />
+    Your browser does not support the video tag.
+  </video>
+</div>
+
 <div id="load"><div class="loadtxt">INITIALISING</div></div>
 <canvas id="bgc"></canvas>
 
@@ -100,7 +136,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:28px 52px;display:fl
 </nav>
 
 <div id="hero">
-  <div class="htitle" id="htitle">FORM FOLLOWS FORCE</div>
+  <div class="htitle" id="htitle">We Create Meaningful Spaces that Inspire and Serve</div>
   <a href="#" class="cta">
     VIEW WORK
     <span class="cta-l h t"></span><span class="cta-l h b"></span>
@@ -149,13 +185,58 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:28px 52px;display:fl
 </div>
 
 <script>
+// ── SPLASH + ANIMATION GATE ──
+// carouselReady = false means tickTransition freezes elapsedPhysicsTime.
+// Set to true the moment the splash is gone.
+let carouselReady = false;
+
+(function() {
+  const navType    = performance.getEntriesByType("navigation")[0].type;
+  const hasVisited = sessionStorage.getItem("hasVisitedD4A");
+  const splash     = document.getElementById("splash");
+  const splashVideo= document.getElementById("splashVideo");
+  const loadEl     = document.getElementById("load");
+
+  function hideSplash() {
+    splash.classList.add("fade-out");
+    setTimeout(() => {
+      splash.style.display = "none";
+      loadEl.classList.add("hide");
+      carouselReady = true; // ← UNLOCK the spin animation
+    }, 800);
+  }
+
+  if (!hasVisited || navType === "reload") {
+    sessionStorage.setItem("hasVisitedD4A", "true");
+
+    splashVideo.addEventListener("ended", hideSplash);
+
+    // iOS autoplay fallback
+    splashVideo.muted = true;
+    const p = splashVideo.play();
+    if (p !== undefined) {
+      p.catch(() => {
+        document.body.addEventListener("touchstart", () => splashVideo.play(), { once: true });
+      });
+    }
+
+  } else {
+    // Internal navigation → skip splash, unlock immediately
+    splash.style.display = "none";
+    loadEl.classList.add("hide");
+    carouselReady = true;
+  }
+})();
+</script>
+
+<script>
 const PROJECTS=[
-  {name:'VERTEX TOWER',year:'2023',desc:'Post-tensioned concrete megastructure, 380m',img:'https://picsum.photos/800/600?grayscale&random=11',full:'A fundamental rethinking of the high-rise form — structural expression and spatial efficiency converge into a singular tectonic gesture. Exposed post-tension cables define both facade and interior character across 380 metres of built space.'},
-  {name:'NULL PAVILION',year:'2022',desc:'Folded steel surface pavilion, temporary installation',img:'https://picsum.photos/800/600?grayscale&random=22',full:'Material investigation into the threshold between surface and structure. A single continuous steel sheet, folded through computational geometry, generates all enclosure, support and programme without discrete elements.'},
-  {name:'AXIS BRIDGE',year:'2021',desc:'Carbon fibre pedestrian crossing, parametric form',img:'https://picsum.photos/800/600?grayscale&random=33',full:'Spanning 180 metres with a section depth of only 900mm. Carbon fibre composite allows structural performance impossible in conventional materials — form derived entirely from force-flow visualisation of the load paths.'},
-  {name:'SECTION HOUSE',year:'2022',desc:'Exposed concrete residential, brutalist sectional logic',img:'https://picsum.photos/800/600?grayscale&random=44',full:'The section drawing as architectural generator. Each floor level is displaced and exposed to the exterior, making the logic of section — normally invisible — the primary spatial and aesthetic experience.'},
-  {name:'MEMBRANE LAB',year:'2023',desc:'ETFE tensile research facility, adaptive envelope',img:'https://picsum.photos/800/600?grayscale&random=55',full:'A research facility whose envelope is the experiment. The ETFE cushion system monitors and responds to thermal, acoustic and light conditions — making environmental performance a direct spatial phenomenon.'},
-  {name:'GRID MONUMENT',year:'2020',desc:'Public monument, structural grid as cultural artifact',img:'https://picsum.photos/800/600?grayscale&random=66',full:'An abstract monument where the structural grid — the invisible armature of all buildings — becomes the subject. A 12-metre cube of pure structural logic, without programme, without enclosure.'},
+  {name:'VERTEX TOWER',year:'2023',desc:'Post-tensioned concrete megastructure, 380m',img:'Amarta CH.webp',full:'A fundamental rethinking of the high-rise form — structural expression and spatial efficiency converge into a singular tectonic gesture. Exposed post-tension cables define both facade and interior character across 380 metres of built space.'},
+  {name:'NULL PAVILION',year:'2022',desc:'Folded steel surface pavilion, temporary installation',img:'Amarta EP.webp',full:'Material investigation into the threshold between surface and structure. A single continuous steel sheet, folded through computational geometry, generates all enclosure, support and programme without discrete elements.'},
+  {name:'AXIS BRIDGE',year:'2021',desc:'Carbon fibre pedestrian crossing, parametric form',img:'Amarta MO.webp',full:'Spanning 180 metres with a section depth of only 900mm. Carbon fibre composite allows structural performance impossible in conventional materials — form derived entirely from force-flow visualisation of the load paths.'},
+  {name:'SECTION HOUSE',year:'2022',desc:'Exposed concrete residential, brutalist sectional logic',img:'Scene1.webp',full:'The section drawing as architectural generator. Each floor level is displaced and exposed to the exterior, making the logic of section — normally invisible — the primary spatial and aesthetic experience.'},
+  {name:'MEMBRANE LAB',year:'2023',desc:'ETFE tensile research facility, adaptive envelope',img:'Scene2.webp',full:'A research facility whose envelope is the experiment. The ETFE cushion system monitors and responds to thermal, acoustic and light conditions — making environmental performance a direct spatial phenomenon.'},
+  {name:'GRID MONUMENT',year:'2020',desc:'Public monument, structural grid as cultural artifact',img:'Screenshot 2026-01-13 192650.png',full:'An abstract monument where the structural grid — the invisible armature of all buildings — becomes the subject. A 12-metre cube of pure structural logic, without programme, without enclosure.'},
 ];
 
 let W=window.innerWidth,H=window.innerHeight;
@@ -259,45 +340,48 @@ function bgLoop(){ctx.clearRect(0,0,W,H);stepGrid();drawGrid();stepParticles();d
 
 // ── GALLERY ──
 const gcont=document.getElementById('gcont'),gstage=document.getElementById('gstage');
-let rot=0,rotV=50.0,dragging=false,lastDX=0,dragV=0,hovered=-1;
+let rot=0,rotV=0,dragging=false,lastDX=0,dragV=0,hovered=-1;
 const cards=[];
 
-// ── INTRO SPIN STATE (Two-Stage Dimensional Entrance) ──
-const PHASE1_DUR = 1200;   // 2D Vortex (ms)
-const PHASE2_DUR = 2800;   // 3D Deployment (ms)
-const HIGH_SPEED = 18.0;   // High-speed spin
-const LOW_SPEED  = 0.1;    // Slow-motion glide
-const MAX_BLUR   = 2;      // Max motion blur (px)
+// ── INTRO SPIN STATE ──
+const PHASE1_DUR = 1200;
+const PHASE2_DUR = 2800;
+const HIGH_SPEED = 18.0;
+const LOW_SPEED  = 0.1;
+const MAX_BLUR   = 2;
 
-let isIntroActive = true;
-let introP        = 0;     // 0 in Phase 1, 0→1 in Phase 2
-let lastPhysicsTick = Date.now();
+let isIntroActive      = true;
+let introP             = 0;
+let lastPhysicsTick    = Date.now();
 let elapsedPhysicsTime = 0;
 
-function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
+function easeOutCubic(x){ return 1 - Math.pow(1 - x, 3); }
 
-function tickTransition() {
-  if (!isIntroActive) return;
+function tickTransition(){
+  if(!isIntroActive) return;
 
   const now = Date.now();
-  let dt = now - lastPhysicsTick;
+  const rawDt = now - lastPhysicsTick;
   lastPhysicsTick = now;
 
-  if (hovered !== -1) dt *= 0.3;
+  // ── KEY CHANGE: only count time after splash is done ──
+  if(!carouselReady) return;
+
+  let dt = rawDt;
+  if(hovered !== -1) dt *= 0.3;
   elapsedPhysicsTime += dt;
 
-  if (elapsedPhysicsTime < PHASE1_DUR) {
-    rotV = HIGH_SPEED;
+  if(elapsedPhysicsTime < PHASE1_DUR){
+    rotV   = HIGH_SPEED;
     introP = 0;
   } else {
     const t = Math.min((elapsedPhysicsTime - PHASE1_DUR) / PHASE2_DUR, 1);
-    introP = easeOutCubic(t);
-    rotV = HIGH_SPEED * (1 - introP) + LOW_SPEED * introP;
-
-    if (t >= 1) {
+    introP  = easeOutCubic(t);
+    rotV    = HIGH_SPEED * (1 - introP) + LOW_SPEED * introP;
+    if(t >= 1){
       isIntroActive = false;
-      rotV = LOW_SPEED;
-      introP = 1;
+      rotV          = LOW_SPEED;
+      introP        = 1;
     }
   }
 }
@@ -311,58 +395,42 @@ PROJECTS.forEach((p,i)=>{
   card.addEventListener('click',()=>openFS(i));
 });
 
-function placeCards() {
+function placeCards(){
   const N  = cards.length;
   const gW = gstage.offsetWidth;
   const gH = gstage.offsetHeight;
-
-  const RX_FULL = Math.min(gW * 0.34, 300);
-  const RY_FULL = gH * 0.18;
+  const RX_FULL  = Math.min(gW * 0.34, 300);
+  const RY_FULL  = gH * 0.18;
   const RX_START = RX_FULL * 0.05;
-
   let frontIdx = 0, frontZ = -Infinity;
-
   cards.forEach((card, i) => {
-    // Individual staggered progress
     const stagger = i * 0.12;
-    const cardP = Math.max(0, Math.min(1, (introP - stagger) / (1 - stagger * 0.8)));
-
-    // Smooth pop-in easing
-    const easeP = 1 - Math.pow(1 - cardP, 3);
-
-    const cur_rx = RX_START + (RX_FULL - RX_START) * easeP;
-    const cur_ry_y = RX_START + (RY_FULL * 0.2 - RX_START) * easeP;
-    const cur_ry_z = RY_FULL * easeP;
+    const cardP   = Math.max(0, Math.min(1, (introP - stagger) / (1 - stagger * 0.8)));
+    const easeP   = 1 - Math.pow(1 - cardP, 3);
+    const cur_rx  = RX_START + (RX_FULL - RX_START) * easeP;
+    const cur_ry_y= RX_START + (RY_FULL * 0.2 - RX_START) * easeP;
+    const cur_ry_z= RY_FULL * easeP;
     const yOffset = -150 * easeP - H * 0.47 * (1 - easeP);
-
-    const a     = (rot + (360 / N) * i) * Math.PI / 180;
-    const x     = Math.cos(a) * cur_rx;
-
-    // Floating idle animation
-    const float = Math.sin(Date.now() * 0.0015 + i * 0.8) * 12 * easeP;
-    const y     = Math.sin(a) * cur_ry_y + yOffset + float;
-    const z     = Math.sin(a) * cur_ry_z;
-
-    const depth = (z + RY_FULL) / (2 * RY_FULL);
-    const sc    = (0.65 + depth * 0.6) * easeP; // scale up from 0
-    const op    = (0.35 + depth * 0.65) * easeP;
-    const zi    = Math.round(depth * 100);
-
-    if (z > frontZ) { frontZ = z; frontIdx = i; }
-
+    const a       = (rot + (360 / N) * i) * Math.PI / 180;
+    const x       = Math.cos(a) * cur_rx;
+    const float   = Math.sin(Date.now() * 0.0015 + i * 0.8) * 12 * easeP;
+    const y       = Math.sin(a) * cur_ry_y + yOffset + float;
+    const z       = Math.sin(a) * cur_ry_z;
+    const depth   = (z + RY_FULL) / (2 * RY_FULL);
+    const sc      = (0.65 + depth * 0.6) * easeP;
+    const op      = (0.35 + depth * 0.65) * easeP;
+    const zi      = Math.round(depth * 100);
+    if(z > frontZ){ frontZ = z; frontIdx = i; }
     const blur = (MAX_BLUR * (1 - easeP)).toFixed(2);
-    const rY = (Math.cos(a) * 15 * easeP).toFixed(1); // Subtle 3D tilt
-
+    const rY   = (Math.cos(a) * 15 * easeP).toFixed(1);
     const cardTransform = i === hovered
       ? `translate3d(${x}px,${y - 40}px,${z}px) scale(${sc * 1.3}) rotateY(${rY}deg)`
       : `translate3d(${x}px,${y}px,${z}px) scale(${sc}) rotateY(${rY}deg)`;
-
-    card.style.transform = cardTransform;
-    card.style.opacity = (op * (hovered >= 0 ? 0.5 : 1)).toFixed(2);
-    card.style.zIndex = i === hovered ? 220 : zi;
-
+    card.style.transform  = cardTransform;
+    card.style.opacity    = (op * (hovered >= 0 ? 0.5 : 1)).toFixed(2);
+    card.style.zIndex     = i === hovered ? 220 : zi;
     const img = card.querySelector('img');
-    if (img) {
+    if(img){
       const baseBright = i === hovered ? 0.95 : 0.7;
       img.style.filter = `blur(${blur}px) brightness(${baseBright}) contrast(1.15) grayscale(${i === hovered ? 0 : 0.5})`;
     }
@@ -370,10 +438,10 @@ function placeCards() {
 }
 
 function stepCarousel(){
-  tickTransition();             // 1. update introP and rotV
-  if(!dragging){rot+=rotV;}     // 2. advance rotation
+  tickTransition();
+  if(!dragging){ rot += rotV; }
   if(introP > 0.8) document.body.classList.add('reveal');
-  placeCards();                 // 3. position cards using latest introP
+  placeCards();
 }
 
 gstage.addEventListener('mousedown',e=>{dragging=true;lastDX=e.clientX;dragV=0;e.stopPropagation();});
@@ -391,7 +459,7 @@ function openFS(i){const p=PROJECTS[i];fsImgEl.src=p.img;fsTitEl.textContent=p.n
 fsxEl.addEventListener('click',()=>{fsEl.classList.remove('on');fsOpen=false;});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&fsOpen){fsEl.classList.remove('on');fsOpen=false;}});
 
-// ── GALLERY PARALLAX ──
+// ── PARALLAX ──
 const htitle=document.getElementById('htitle');
 let hx=0,hy=0,thx=0,thy=0;
 let grX=0,grY=0,tgrX=0,tgrY=0;
@@ -405,20 +473,19 @@ if('ontouchstart'in window){
   setInterval(()=>{const t=Date.now()*.001;mouseX=W*.5+Math.sin(t*.4)*W*.28;mouseY=H*.5+Math.cos(t*.3)*H*.22;thx=Math.sin(t*.25)*8;thy=Math.cos(t*.2)*4;},16);
 }
 
-// ── LOOP ──
+// ── MAIN LOOP ──
 function loop(){
   requestAnimationFrame(loop);
   bgLoop();stepCarousel();
   hx+=(thx-hx)*.08;hy+=(thy-hy)*.08;
   htitle.style.transform=`translate(${hx}px,${hy}px)`;
-
   grX+=(tgrX-grX)*.05;grY+=(tgrY-grY)*.05;
   gcont.style.transform=`rotateX(${grX}deg) rotateY(${grY}deg)`;
 }
 
 window.addEventListener('resize',()=>{W=window.innerWidth;H=window.innerHeight;resize();});
-resize();loop();
-setTimeout(()=>document.getElementById('load').classList.add('hide'),700);
+resize();
+loop();
 </script>
 </body>
 </html>
