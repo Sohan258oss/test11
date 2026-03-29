@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D4A Studio – Projects</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <style>
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: #0a0a0a;
+      color: #f0ede8;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button { cursor: pointer; }
+    img { display: block; max-width: 100%; }
+
+    /* ============================================================
+       CSS VARIABLES
+    ============================================================ */
+    :root {
+      --gold: #c9a84c;
+      --gold-light: #e0c070;
+      --dark: #0a0a0a;
+      --dark-2: #111111;
+      --dark-3: #1a1a1a;
+      --dark-card: #141414;
+      --white: #f0ede8;
+      --muted: rgba(240, 237, 232, 0.55);
+      --radius: 4px;
+      --header-h: 72px;
+    }
+
+    /* ============================================================
+       NAVBAR
+    ============================================================ */
+    .header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 10000;
+      background: rgba(10, 10, 10, 0.85);
+      padding: 0.8rem 0;
+      border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+      transition: background 0.4s ease;
+    }
+
+    @supports (backdrop-filter: blur(15px)) {
+      .header {
+        background: rgba(10, 10, 10, 0.7);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+      }
+    }
+
+    .header-container {
+      max-width: 80rem;
+      margin: 0 auto;
+      padding: 0.3rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo-container { display: flex; align-items: center; }
+    .logo { height: 3rem; width: auto; }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+    }
+
+    .nav a {
+      color: var(--white);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      position: relative;
+      padding: 10px 0;
+    }
+
+    .nav a[aria-current="page"] { color: var(--gold); }
+
+    .nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 2px; left: 0; right: 0;
+      height: 1px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .nav a[aria-current="page"]::after { transform: scaleX(1); }
+
+    /* Slot hover */
+    .slot {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      height: 1.1em;
+      line-height: 1.1em;
+    }
+
+    .slot span { display: block; transition: transform 0.5s ease; line-height: 1.1em; }
+
+    .slot .bottom {
+      position: absolute;
+      top: 0; left: 0; width: 100%;
+      transform: translateY(-100%);
+    }
+
+    .nav a:hover .slot .top { transform: translateY(100%); }
+    .nav a:hover .slot .bottom { transform: translateY(0); }
+
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      cursor: pointer;
+      z-index: 9999;
+    }
+
+    .hamburger span {
+      width: 26px;
+      height: 2px;
+      background: var(--white);
+      border-radius: 2px;
+      transition: 0.3s;
+    }
+
+    .hamburger.active span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+
+    @media (max-width: 900px) {
+      .nav { display: none !important; }
+      .hamburger { display: flex !important; }
+    }
+
+    /* ============================================================
+       MOBILE MENU
+    ============================================================ */
+    .sm-wrapper {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 200000;
+    }
+
+    .sm-wrapper.active { pointer-events: auto; }
+
+    .sm-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      opacity: 0;
+    }
+
+    .sm-panel {
+      position: absolute;
+      top: 0; right: 0;
+      width: min(80vw, 360px);
+      height: 100%;
+      background: var(--dark-2);
+      border-left: 1px solid rgba(201, 168, 76, 0.2);
+      padding: 6.5rem 2rem;
+      transform: translateX(100%);
+    }
+
+    .sm-list { list-style: none; }
+    .sm-list li { overflow: hidden; margin-bottom: 1.8rem; }
+
+    .sm-list a {
+      display: block;
+      font-size: clamp(1.4rem, 4.5vw, 1.9rem);
+      font-weight: 400;
+      color: var(--white);
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      transform: translateY(140%);
+      display: block;
+    }
+
+    .sm-list a:hover { color: var(--gold); }
+
+    @media (min-width: 901px) { .sm-wrapper { display: none; } }
+
+    /* ============================================================
+       PAGE HERO
+    ============================================================ */
+    .page-hero {
+      padding: calc(var(--header-h) + 5rem) 1.5rem 3rem;
+      max-width: 80rem;
+      margin: 0 auto;
+    }
+
+    .page-hero-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.3em;
+      color: var(--gold);
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .page-hero-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 400;
+      color: var(--white);
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+    }
+
+    .page-hero-line {
+      width: 48px;
+      height: 1px;
+      background: var(--gold);
+      margin-top: 1.5rem;
+    }
+
+    /* ============================================================
+       PROJECT CARDS — SHARED
+    ============================================================ */
+    .proj-card {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+
+    .proj-card:hover .card-img { transform: scale(1.04); }
+
+    .proj-card:hover .card-overlay {
+      background: linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.5) 60%, transparent 100%);
+    }
+
+    .proj-card:hover .card-info { transform: translateY(0); opacity: 1; }
+    .proj-card:hover .card-cta { opacity: 1; transform: translateY(0); }
+
+    .card-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 1.5rem;
+      transition: background 0.4s ease;
+    }
+
+    .card-meta-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-tag {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      font-weight: 600;
+      color: var(--gold);
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(201, 168, 76, 0.4);
+      padding: 0.25rem 0.6rem;
+      border-radius: 2px;
+    }
+
+    .card-year {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    .card-info { transition: transform 0.4s ease, opacity 0.4s ease; }
+
+    .card-title, .hero-card-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 400;
+      color: var(--white);
+      line-height: 1.2;
+      margin-bottom: 0.35rem;
+    }
+
+    .card-sub {
+      font-size: 0.78rem;
+      color: rgba(240, 237, 232, 0.7);
+      letter-spacing: 0.03em;
+      margin-bottom: 0.6rem;
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .card-cta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      color: var(--gold);
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s ease 0.1s, transform 0.4s ease 0.1s;
+    }
+
+    .cta-arrow { transition: transform 0.3s ease; }
+    .card-cta:hover .cta-arrow { transform: translateX(4px); }
+
+    .card-recognition {
+      display: inline-block;
+      margin-top: 0.6rem;
+      font-size: 0.72rem;
+      color: var(--gold);
+      background: rgba(201, 168, 76, 0.1);
+      border: 1px solid rgba(201, 168, 76, 0.3);
+      padding: 0.25rem 0.75rem;
+      border-radius: 2px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ============================================================
+       FEATURED HERO CARD
+    ============================================================ */
+    .featured-section {
+      padding: 0 1.5rem 1.5rem;
+      max-width: 80rem;
+      margin: 0 auto;
+    }
+
+    .proj-card--hero {
+      height: clamp(400px, 60vh, 680px);
+      border-radius: 6px;
+    }
+
+    .proj-card--hero .card-overlay {
+      background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.25) 55%, transparent 100%);
+    }
+
+    .proj-card--hero .hero-card-title {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+    }
+
+    .proj-card--hero .card-desc { display: block; }
+    .proj-card--hero .card-info { transform: translateY(0); opacity: 1; }
+
+    /* ============================================================
+       PROJECTS GRID
+    ============================================================ */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: 320px 320px;
+      gap: 4px;
+      max-width: 80rem;
+      margin: 0 auto;
+      padding: 0 1.5rem 1.5rem;
+    }
+
+    .proj-card--grid .card-info { transform: translateY(12px); opacity: 0.85; }
+    .proj-card--grid .card-title { font-size: 1.3rem; }
+
+    .proj-card--grid:nth-child(1) { grid-column: 1; grid-row: 1 / span 2; }
+    .proj-card--grid:nth-child(2) { grid-column: 2; grid-row: 1; }
+    .proj-card--grid:nth-child(3) { grid-column: 3; grid-row: 1; }
+    .proj-card--grid:nth-child(4) { grid-column: 2 / span 2; grid-row: 2; }
+
+    @media (max-width: 1024px) {
+      .projects-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: 280px 280px 280px;
+      }
+      .proj-card--grid:nth-child(1) { grid-column: 1; grid-row: 1 / span 2; }
+      .proj-card--grid:nth-child(2) { grid-column: 2; grid-row: 1; }
+      .proj-card--grid:nth-child(3) { grid-column: 2; grid-row: 2; }
+      .proj-card--grid:nth-child(4) { grid-column: 1 / span 2; grid-row: 3; }
+    }
+
+    @media (max-width: 600px) {
+      .projects-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: none;
+      }
+      .proj-card--grid:nth-child(1),
+      .proj-card--grid:nth-child(2),
+      .proj-card--grid:nth-child(3),
+      .proj-card--grid:nth-child(4) {
+        grid-column: 1;
+        grid-row: auto;
+        min-height: 260px;
+      }
+      .proj-card--hero { height: 420px; }
+    }
+
+    /* ============================================================
+       PROJECTS COUNT
+    ============================================================ */
+    .projects-count {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      padding: 2.5rem 1.5rem;
+      max-width: 80rem;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      font-weight: 500;
+    }
+
+    .count-line {
+      flex: 1;
+      height: 1px;
+      background: rgba(240, 237, 232, 0.12);
+    }
+
+    /* ============================================================
+       PROJECT MATRIX SECTION (light section)
+    ============================================================ */
+    .project-matrix {
+      padding: 7rem 2rem 6rem;
+      background: #fff;
+      color: #000;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .matrix-container { max-width: 1200px; margin: auto; }
+
+    .matrix-header { text-align: center; margin-bottom: 4rem; }
+
+    .matrix-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.35em;
+      opacity: 0.5;
+      color: #000;
+    }
+
+    .matrix-title {
+      margin-top: 0.8rem;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 300;
+      letter-spacing: 0.25em;
+      font-family: 'Playfair Display', serif;
+      color: #000;
+    }
+
+    .matrix-line {
+      width: 80px;
+      height: 1px;
+      background: #000;
+      margin: 2rem auto 0;
+      opacity: 0.25;
+    }
+
+    .matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 2rem;
+    }
+
+    .matrix-item {
+      position: relative;
+      padding: 2.5rem 1.2rem;
+      cursor: pointer;
+      border-top: 1px solid rgba(0,0,0,0.15);
+      opacity: 0;
+      transform: translateY(30px);
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .matrix-item:hover { transform: translateY(-8px) !important; }
+
+    .matrix-index {
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      opacity: 0.4;
+      color: #000;
+    }
+
+    .matrix-item h4 {
+      margin-top: 0.8rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: #000;
+    }
+
+    /* Image preview on hover */
+    .matrix-preview {
+      position: absolute;
+      top: -140%;
+      left: 50%;
+      transform: translateX(-50%) scale(0.96);
+      width: 240px;
+      height: 150px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 100;
+    }
+
+    .matrix-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 14px;
+      box-shadow: 0 35px 70px rgba(0,0,0,0.18);
+    }
+
+    .matrix-item:hover .matrix-preview {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+
+    /* Entry animations */
+    .matrix-item:nth-child(1) { animation: matrixIn 0.6s 0.1s forwards; }
+    .matrix-item:nth-child(2) { animation: matrixIn 0.6s 0.2s forwards; }
+    .matrix-item:nth-child(3) { animation: matrixIn 0.6s 0.3s forwards; }
+    .matrix-item:nth-child(4) { animation: matrixIn 0.6s 0.4s forwards; }
+    .matrix-item:nth-child(5) { animation: matrixIn 0.6s 0.5s forwards; }
+
+    @keyframes matrixIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 900px) {
+      .matrix-grid { grid-template-columns: repeat(2, 1fr); }
+      .matrix-preview { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      .matrix-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    .projects-footer {
+      border-top: 1px solid rgba(240, 237, 232, 0.08);
+      padding: 3rem 1.5rem;
+      background: var(--dark);
+    }
+
+    .footer-inner {
+      max-width: 80rem;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+    }
+
+    .footer-links { display: flex; gap: 2rem; }
+
+    .footer-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      transition: color 0.2s ease;
+    }
+
+    .footer-links a:hover { color: var(--white); }
+
+    .footer-copy {
+      font-size: 0.72rem;
+      color: rgba(240, 237, 232, 0.3);
+      letter-spacing: 0.05em;
+    }
+
+    /* ============================================================
+       MODAL
+    ============================================================ */
+    .proj-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 500000;
+      background: rgba(0,0,0,0.82);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    @supports (backdrop-filter: blur(8px)) {
+      .proj-modal-overlay {
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+    }
+
+    .proj-modal-overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .proj-modal-box {
+      background: var(--dark-2);
+      border: 1px solid rgba(201, 168, 76, 0.15);
+      border-radius: 8px;
+      width: min(860px, 95vw);
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      opacity: 0;
+      transform: translateY(60px) scale(0.96);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .proj-modal-overlay.visible .proj-modal-box {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .proj-modal-box::-webkit-scrollbar { width: 3px; }
+    .proj-modal-box::-webkit-scrollbar-track { background: transparent; }
+    .proj-modal-box::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 2px; }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--white);
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      z-index: 10;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .modal-close-btn:hover {
+      background: rgba(201, 168, 76, 0.15);
+      border-color: var(--gold);
+    }
+
+    .modal-img-wrap {
+      position: relative;
+      height: 360px;
+      overflow: hidden;
+      border-radius: 8px 8px 0 0;
+    }
+
+    .modal-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .modal-img-tag {
+      position: absolute;
+      top: 1rem; left: 1rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(201, 168, 76, 0.4);
+      padding: 0.25rem 0.65rem;
+      border-radius: 2px;
+    }
+
+    .modal-body { padding: 2.5rem; }
+
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 400;
+      color: var(--white);
+      margin-bottom: 1rem;
+    }
+
+    .modal-title-line {
+      width: 40px; height: 1px;
+      background: var(--gold);
+      margin-bottom: 2rem;
+    }
+
+    .modal-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid rgba(240, 237, 232, 0.08);
+    }
+
+    @media (max-width: 600px) {
+      .modal-meta-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .meta-label {
+      display: block;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+      font-weight: 500;
+    }
+
+    .meta-value {
+      display: block;
+      font-size: 0.95rem;
+      color: var(--white);
+      font-weight: 300;
+    }
+
+    .modal-desc-section { margin-bottom: 2rem; }
+
+    .modal-desc-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .modal-desc-text {
+      font-size: 0.92rem;
+      color: rgba(240, 237, 232, 0.75);
+      line-height: 1.8;
+      font-weight: 300;
+    }
+
+    .modal-recognition {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      border: 1px solid rgba(201, 168, 76, 0.2);
+      border-radius: 4px;
+      background: rgba(201, 168, 76, 0.05);
+      margin-bottom: 2rem;
+    }
+
+    .recog-star { color: var(--gold); font-size: 1rem; margin-top: 0.1rem; }
+    .recog-label { display: block; font-size: 0.65rem; letter-spacing: 0.2em; color: var(--muted); margin-bottom: 0.25rem; }
+    .recog-text { font-size: 0.88rem; color: var(--gold); }
+
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    @media (max-width: 500px) {
+      .modal-actions { flex-direction: column; }
+      .modal-inquire-btn, .modal-close-text { width: 100%; }
+    }
+
+    .modal-inquire-btn {
+      flex: 1;
+      background: var(--gold);
+      color: #0a0a0a;
+      border: none;
+      padding: 1rem 1.5rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      font-weight: 600;
+      border-radius: 2px;
+      transition: background 0.2s ease, transform 0.2s ease;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .modal-inquire-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+    .modal-close-text {
+      background: transparent;
+      border: 1px solid rgba(240, 237, 232, 0.2);
+      color: var(--white);
+      padding: 1rem 1.5rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      border-radius: 2px;
+      transition: border-color 0.2s ease;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .modal-close-text:hover { border-color: rgba(240, 237, 232, 0.5); }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAVBAR ─── -->
+  <header class="header" id="header">
+    <div class="header-container">
+      <div class="logo-container">
+        <a href="/" style="line-height:0">
+          <img src="logo.jpg" class="logo" alt="D4A logo" />
+        </a>
+      </div>
+      <nav class="nav">
+        <a href="/"><span class="slot"><span class="top">Home</span><span class="bottom">Home</span></span></a>
+        <a href="projects.html" aria-current="page"><span class="slot"><span class="top">Projects</span><span class="bottom">Projects</span></span></a>
+        <a href="aboutus.html"><span class="slot"><span class="top">About Us</span><span class="bottom">About Us</span></span></a>
+      </nav>
+      <div class="hamburger" id="hamburgerBtn">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── MOBILE MENU ─── -->
+  <div class="sm-wrapper" id="smWrapper">
+    <div class="sm-backdrop" id="smBackdrop"></div>
+    <aside class="sm-panel" id="smPanel">
+      <ul class="sm-list">
+        <li><a href="/">Home</a></li>
+        <li><a href="projects.html">Projects</a></li>
+        <li><a href="aboutus.html">About Us</a></li>
+      </ul>
+    </aside>
+  </div>
+
+  <!-- ── PAGE HERO ─── -->
+  <div class="page-hero">
+    <p class="page-hero-label">OUR WORK</p>
+    <h1 class="page-hero-heading">Selected Projects</h1>
+    <div class="page-hero-line"></div>
+  </div>
+
+  <!-- ── FEATURED HERO CARD ─── -->
+  <div class="featured-section">
+    <div class="proj-card proj-card--hero" data-id="1">
+      <img src="Scene1.webp" alt="Urban Edge" class="card-img" />
+      <div class="card-overlay">
+        <div class="card-meta-top">
+          <span class="card-tag">RESIDENTIAL</span>
+          <span class="card-year">2024</span>
+        </div>
+        <div class="card-info">
+          <h2 class="hero-card-title project-title">Urban Edge</h2>
+          <p class="card-sub">Sigehalli, Bangalore · 3.2 Acres</p>
+          <p class="card-desc">D4A Studio's proposal envisions an exclusive uber-luxury residential community in Sigehalli, crafted to offer calm, privacy, and sophistication. The architecture features contemporary tower forms...</p>
+          <div class="card-cta">
+            <span>VIEW PROJECT</span>
+            <span class="cta-arrow">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PROJECTS GRID ─── -->
+  <div class="projects-grid">
+    <!-- Card 1 -->
+    <div class="proj-card proj-card--grid" data-id="2">
+      <img src="Amarta MO.webp" alt="Amarta Marketing Office" class="card-img" />
+      <div class="card-overlay">
+        <div class="card-meta-top">
+          <span class="card-tag">COMMERCIAL</span>
+          <span class="card-year">2023</span>
+        </div>
+        <div class="card-info">
+          <h3 class="card-title project-title">Amarta Marketing Office</h3>
+          <p class="card-sub">Bangalore · 8,200 sq ft</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="proj-card proj-card--grid" data-id="3">
+      <img src="Scene2.webp" alt="RRN LUX" class="card-img" />
+      <div class="card-overlay">
+        <div class="card-meta-top">
+          <span class="card-tag">RESIDENTIAL</span>
+          <span class="card-year">2023</span>
+        </div>
+        <div class="card-info">
+          <h3 class="card-title project-title">RRN LUX</h3>
+          <p class="card-sub">RR Nagar, Bangalore · 1.8 Acres</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="proj-card proj-card--grid" data-id="4">
+      <img src="Suresh Residence  (1).webp" alt="Suresh Residence" class="card-img" />
+      <div class="card-overlay">
+        <div class="card-meta-top">
+          <span class="card-tag">RESIDENTIAL</span>
+          <span class="card-year">2022</span>
+        </div>
+        <div class="card-info">
+          <h3 class="card-title project-title">Suresh Residence</h3>
+          <p class="card-sub">Sarjapur, Bangalore · 2,400 sq ft</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="proj-card proj-card--grid" data-id="5">
+      <img src="Sumukha Residence.webp" alt="Sumukha Residence" class="card-img" />
+      <div class="card-overlay">
+        <div class="card-meta-top">
+          <span class="card-tag">RESIDENTIAL</span>
+          <span class="card-year">2022</span>
+        </div>
+        <div class="card-info">
+          <h3 class="card-title project-title">Sumukha Residence</h3>
+          <p class="card-sub">Bangalore · 1,500 sq ft</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PROJECTS COUNT ─── -->
+  <div class="projects-count">
+    <div class="count-line"></div>
+    <span>SHOWING 5 OF 5 PROJECTS</span>
+    <div class="count-line"></div>
+  </div>
+
+  <!-- ── PROJECT MATRIX SECTION ─── -->
+  <section class="project-matrix">
+    <div class="matrix-container">
+      <div class="matrix-header">
+        <span class="matrix-label">SELECTED WORKS</span>
+        <h2 class="matrix-title">PROJECT INDEX</h2>
+        <div class="matrix-line"></div>
+      </div>
+      <div class="matrix-grid">
+
+        <div class="matrix-item" data-scroll="Urban Edge">
+          <span class="matrix-index">01</span>
+          <h4>Urban Edge</h4>
+          <div class="matrix-preview">
+            <img src="Scene1.webp" alt="Urban Edge" />
+          </div>
+        </div>
+
+        <div class="matrix-item" data-scroll="Amarta Marketing Office">
+          <span class="matrix-index">02</span>
+          <h4>Amarta</h4>
+          <div class="matrix-preview">
+            <img src="Amarta MO.webp" alt="Amarta" />
+          </div>
+        </div>
+
+        <div class="matrix-item" data-scroll="RRN LUX">
+          <span class="matrix-index">03</span>
+          <h4>RRN LUX</h4>
+          <div class="matrix-preview">
+            <img src="Scene2.webp" alt="RRN LUX" />
+          </div>
+        </div>
+
+        <div class="matrix-item" data-scroll="Suresh Residence">
+          <span class="matrix-index">04</span>
+          <h4>Suresh Residence</h4>
+          <div class="matrix-preview">
+            <img src="Suresh Residence  (1).webp" alt="Suresh Residence" />
+          </div>
+        </div>
+
+        <div class="matrix-item" data-scroll="Sumukha Residence">
+          <span class="matrix-index">05</span>
+          <h4>Sumukha Residence</h4>
+          <div class="matrix-preview">
+            <img src="Sumukha Residence.webp" alt="Sumukha Residence" />
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ─── -->
+  <footer class="projects-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">D4A STUDIO</div>
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="projects.html">Projects</a>
+        <a href="aboutus.html">About</a>
+      </div>
+      <div class="footer-copy">© 2024 D4A Studio. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <!-- ── MODAL ─── -->
+  <div class="proj-modal-overlay" id="modalOverlay">
+    <div class="proj-modal-box" id="modalBox">
+      <button class="modal-close-btn" id="modalCloseBtn">✕</button>
+      <div class="modal-img-wrap">
+        <img id="modalImg" src="" alt="" />
+        <div class="modal-img-tag" id="modalImgTag"></div>
+      </div>
+      <div class="modal-body">
+        <h2 class="modal-title" id="modalTitle"></h2>
+        <div class="modal-title-line"></div>
+        <div class="modal-meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">LOCATION</span>
+            <span class="meta-value" id="modalLocation"></span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">YEAR</span>
+            <span class="meta-value" id="modalYear"></span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">PROGRAM</span>
+            <span class="meta-value" id="modalProgram"></span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">AREA</span>
+            <span class="meta-value" id="modalArea"></span>
+          </div>
+        </div>
+        <div class="modal-desc-section">
+          <p class="modal-desc-label">PROJECT DESCRIPTION</p>
+          <p class="modal-desc-text" id="modalDesc"></p>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-inquire-btn">INQUIRE ABOUT THIS PROJECT</button>
+          <button class="modal-close-text" id="modalCloseText">CLOSE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SCRIPTS ─── -->
+  <script>
+    /* ============================================================
+       PROJECT DATA
+    ============================================================ */
+    const projectsData = {
+      1: {
+        title: 'Urban Edge',
+        category: 'RESIDENTIAL',
+        year: '2024',
+        location: 'Sigehalli, Bangalore',
+        area: '3.2 Acres',
+        program: 'Luxury Residential',
+        image: '/Urban Edge.png',
+        description: `D4A Studio's proposal envisions an exclusive uber-luxury residential community in Sigehalli, crafted to offer calm, privacy, and sophistication. The architecture features contemporary tower forms, expansive decks, and a refined material palette that elevates modern living. Spacious 3, 3.5 & 4, 4.5 BHK residences, duplex sky villas, and penthouses are planned with generous ceiling heights and premium finishes.`,
+      },
+      2: {
+        title: 'Amarta Marketing Office',
+        category: 'COMMERCIAL',
+        year: '2023',
+        location: 'Bangalore',
+        area: '8,200 sq ft',
+        program: 'Corporate Office',
+        image: '/Amarta MO.png',
+        description: `The Amarta Marketing Office by D4A Studio is not just a workspace; it's a strategically designed client experience. The project redefines the traditional corporate environment by integrating hospitality and engagement into its core. The central feature is a captivating courtyard — a tranquil water body surrounds a central tree, creating a peaceful oasis accessible to clients.`,
+      },
+      3: {
+        title: 'RRN LUX',
+        category: 'RESIDENTIAL',
+        year: '2023',
+        location: 'RR Nagar, Bangalore',
+        area: '1.8 Acres',
+        program: 'Uber-Luxury Residential',
+        image: '/RRN LUX.png',
+        description: `D4A Studio presents an uber-luxury residential address in RR Nagar that blends timeless architecture with contemporary living. The design choreographs light, privacy, and landscape to create a calm, resort-grade experience minutes from the city. The master plan orients towers to capture prevailing breezes and long views while minimising heat gain.`,
+      },
+      4: {
+        title: 'Suresh Residence',
+        category: 'RESIDENTIAL',
+        year: '2022',
+        location: 'Sarjapur, Bangalore',
+        area: '2,400 sq ft',
+        program: 'Residential',
+        image: '/Suresh Residence .JPG',
+        description: `A four-story, East-facing residential building on a 40' x 60' site in Sarjapur. The architecture by D4A Studio combines modern aesthetics with functional spaces, focusing on natural light, open-plan living, and unique features like a double-height dining area and an integrated waterfall.`,
+      },
+      5: {
+        title: 'Sumukha Residence',
+        category: 'RESIDENTIAL',
+        year: '2022',
+        location: 'Bangalore',
+        area: '1,500 sq ft',
+        program: 'Renovation',
+        image: '/Sumukha Residence.jpg',
+        description: `A modern renovation of a residential building on a 30' x 50' East-facing site. The design focuses on updating the existing structure to meet contemporary living standards, maximising space, improving natural light and ventilation, and introducing a sleek, modern aesthetic without expanding the original footprint.`,
+      },
+    };
+
+    /* ============================================================
+       MODAL
+    ============================================================ */
+    const overlay   = document.getElementById('modalOverlay');
+    const closeBtn  = document.getElementById('modalCloseBtn');
+    const closeText = document.getElementById('modalCloseText');
+
+    function openModal(id) {
+      const p = projectsData[id];
+      if (!p) return;
+      document.getElementById('modalImg').src       = p.image;
+      document.getElementById('modalImg').alt       = p.title;
+      document.getElementById('modalImgTag').textContent  = p.category;
+      document.getElementById('modalTitle').textContent   = p.title;
+      document.getElementById('modalLocation').textContent = p.location;
+      document.getElementById('modalYear').textContent    = p.year;
+      document.getElementById('modalProgram').textContent = p.program;
+      document.getElementById('modalArea').textContent    = p.area;
+      document.getElementById('modalDesc').textContent    = p.description;
+      document.body.style.overflow = 'hidden';
+      overlay.classList.add('visible');
+    }
+
+    function closeModal() {
+      overlay.classList.remove('visible');
+      document.body.style.overflow = '';
+    }
+
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+    closeBtn.addEventListener('click', closeModal);
+    closeText.addEventListener('click', closeModal);
+
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+    /* ── Attach open to all project cards ── */
+    document.querySelectorAll('.proj-card[data-id]').forEach(card => {
+      card.addEventListener('click', () => openModal(parseInt(card.dataset.id)));
+    });
+
+    /* ============================================================
+       SCROLL-REVEAL CARDS (GSAP)
+    ============================================================ */
+    const cards = document.querySelectorAll('.proj-card');
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          gsap.to(entry.target, {
+            opacity: 1,
+            y: 0,
+            duration: 0.85,
+            ease: 'power3.out',
+            delay: (parseInt(entry.target.dataset.index) % 3) * 0.12,
+          });
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    cards.forEach((card, i) => {
+      card.dataset.index = i;
+      gsap.set(card, { opacity: 0, y: 60 });
+      revealObserver.observe(card);
+    });
+
+    /* ============================================================
+       TYPEWRITER ON HERO HEADING
+    ============================================================ */
+    const heroTitle = document.querySelector('.hero-card-title');
+    if (heroTitle) {
+      const text = heroTitle.textContent;
+      heroTitle.textContent = '';
+      heroTitle.style.borderRight = '2px solid #c9a84c';
+      let i = 0;
+      const type = () => {
+        if (i < text.length) {
+          heroTitle.textContent += text[i++];
+          setTimeout(type, 45);
+        } else {
+          heroTitle.style.borderRight = 'none';
+        }
+      };
+      setTimeout(type, 600);
+    }
+
+    /* ============================================================
+       HAMBURGER MENU (GSAP)
+    ============================================================ */
+    const hamburger = document.getElementById('hamburgerBtn');
+    const wrapper   = document.getElementById('smWrapper');
+    const panel     = document.getElementById('smPanel');
+    const backdrop  = document.getElementById('smBackdrop');
+    const menuLinks = document.querySelectorAll('.sm-list a');
+    let menuOpen = false;
+
+    gsap.set(panel,     { xPercent: 100 });
+    gsap.set(menuLinks, { yPercent: 140 });
+
+    const tl_menu = gsap.timeline({ paused: true });
+    tl_menu
+      .to(backdrop,  { opacity: 1, duration: 0.3 })
+      .to(panel,     { xPercent: 0, duration: 0.65, ease: 'power4.out' }, 0)
+      .to(menuLinks, { yPercent: 0, duration: 1, ease: 'power4.out', stagger: 0.1 }, 0.2);
+
+    function toggleMenu() {
+      menuOpen = !menuOpen;
+      wrapper.classList.toggle('active', menuOpen);
+      hamburger.classList.toggle('active', menuOpen);
+      if (menuOpen) tl_menu.play(0); else tl_menu.reverse();
+    }
+
+    hamburger.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(); });
+    backdrop.addEventListener('click', toggleMenu);
+    menuLinks.forEach(link => link.addEventListener('click', toggleMenu));
+
+    /* ============================================================
+       PROJECT MATRIX — scroll to card on click
+    ============================================================ */
+    document.querySelectorAll('.matrix-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const target = item.dataset.scroll;
+        document.querySelectorAll('.project-title').forEach(titleEl => {
+          if (titleEl.textContent.trim() === target) {
+            titleEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>
