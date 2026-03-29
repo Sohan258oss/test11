@@ -40,7 +40,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:28px 52px;display:fl
 .navlinks{display:flex;gap:44px;list-style:none;}
 .navlinks li a{font-size:10px;letter-spacing:.3em;color:var(--grey);text-decoration:none;display:flex;transition:color .4s;}
 .navlinks li a:hover{color:var(--off);}
-.navlinks li a span{display:inline-block;transition:transform .5s cubic-bezier(.19,1,.22,1);}
+.navlinks li a span{display:inline-block;transition:transform .5s cubic-bezier(.19,1,.22,1);pointer-events:none;}
 .navlinks li a:hover span{transform:translateY(-5px);}
 .navlinks li a:hover span:nth-child(2n){transform:translateY(5px);}
 #hero{position:fixed;left:50%;top:24%;transform:translate(-50%,30px);z-index:100;text-align:center;pointer-events:none;user-select:none;opacity:0;transition:transform 1.5s cubic-bezier(.16,1,.3,1),opacity 1.5s ease;}
