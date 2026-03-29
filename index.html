@@ -103,11 +103,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:28px 52px;display:fl
 @media (max-width: 800px) {
   nav{padding:20px 24px;}
   .navlinks{display:none;}
-  #hero{top:20%;}
-  .htitle{font-size:16px;letter-spacing:.3em;}
+  #hero{top:22%;}
+  .htitle{font-size:10px;letter-spacing:0.01em;font-family:'sf corbel',Corbel,sans-serif;}
+  .card{width:90px;height:125px;margin:-62px -45px;}
+  .cinfo{padding:8px;}
   #foot{bottom:8px;}
-  .ft-main-row{gap:10px;flex-direction:column;}
-  .ft-row{font-size:11px;}
+  .ft-main-row{gap:4px;flex-direction:column;}
+  .ft-row{font-size:9px;}
   .fsc{flex-direction:column;gap:28px;}
   .fstxt{flex:0 0 auto;}
   .fsx{right:20px;}
@@ -427,8 +429,14 @@ function placeCards(){
   const N  = cards.length;
   const gW = gstage.offsetWidth;
   const gH = gstage.offsetHeight;
-  const RX_FULL  = Math.min(gW * 0.34, 300);
-  const RY_FULL  = gH * 0.18;
+  let RX_FULL  = Math.min(gW * 0.34, 300);
+  let RY_FULL  = gH * 0.18;
+  let y_off_base = -150;
+  if(W < 800){
+    RX_FULL = 130;
+    RY_FULL = 60;
+    y_off_base = -120;
+  }
   const RX_START = RX_FULL * 0.05;
   let frontIdx = 0, frontZ = -Infinity;
   cards.forEach((card, i) => {
@@ -438,7 +446,7 @@ function placeCards(){
     const cur_rx  = RX_START + (RX_FULL - RX_START) * easeP;
     const cur_ry_y= RX_START + (RY_FULL * 0.2 - RX_START) * easeP;
     const cur_ry_z= RY_FULL * easeP;
-    const yOffset = -150 * easeP - H * 0.47 * (1 - easeP);
+    const yOffset = y_off_base * easeP - H * 0.47 * (1 - easeP);
     const a       = (rot + (360 / N) * i) * Math.PI / 180;
     const x       = Math.cos(a) * cur_rx;
     const float   = Math.sin(Date.now() * 0.0015 + i * 0.8) * 12 * easeP;
